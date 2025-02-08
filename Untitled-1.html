@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Surprise for You</title>
+    <title>Interactive Surprise</title>
     <style>
         body {
             margin: 0;
@@ -13,82 +13,185 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background: linear-gradient(135deg, #f3c4fb, #91eae4);
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
-            color: #333;
+            color: #fff;
+            cursor: none;
         }
+
+        .cursor-trail {
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+
         h1 {
-            font-size: 3rem;
-            animation: fadeIn 2s ease-in-out;
+            font-size: 3.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: bounce 2s ease infinite;
         }
+
         p {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             margin-top: 1rem;
             animation: fadeIn 3s ease-in-out;
         }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
+
         .heart {
             position: absolute;
-            width: 50px;
-            height: 50px;
-            background: pink;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 192, 203, 0.8);
             transform: rotate(45deg);
-            animation: float 4s ease-in-out infinite;
+            animation: floatHeart 4s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
-        .heart:before,
-        .heart:after {
-            content: '';
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: pink;
+
+        .heart:hover {
+            transform: rotate(45deg) scale(1.2);
+        }
+
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            animation: particle 1s ease-out forwards;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes floatHeart {
+            0% { transform: translateY(0) rotate(45deg); opacity: 1; }
+            50% { transform: translateY(-100px) rotate(45deg); opacity: 0.5; }
+            100% { transform: translateY(0) rotate(45deg); opacity: 1; }
+        }
+
+        @keyframes particle {
+            0% { transform: translate(0, 0); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+        }
+
+        .click-effect {
+            position: fixed;
+            border: 2px solid white;
             border-radius: 50%;
+            animation: clickRipple 0.8s ease-out forwards;
+            pointer-events: none;
         }
-        .heart:before {
-            top: -25px;
-            left: 0;
-        }
-        .heart:after {
-            top: 0;
-            left: -25px;
-        }
-        @keyframes float {
-            0% {
-                transform: translateY(0) rotate(45deg);
-                opacity: 1;
-            }
-            50% {
-                transform: translateY(-50px) rotate(45deg);
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(0) rotate(45deg);
-                opacity: 1;
-            }
+
+        @keyframes clickRipple {
+            0% { width: 0; height: 0; opacity: 0.5; }
+            100% { width: 100px; height: 100px; opacity: 0; }
         }
     </style>
     <script>
-        function createHearts() {
-            const heart = document.createElement('div');
-            heart.className = 'heart';
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.animationDuration = Math.random() * 2 + 3 + 's';
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 5000);
-        }
-        window.onload = function () {
-            document.querySelector('h1').textContent = "Hey, you're amazing! 🌸";
-            document.querySelector('p').textContent = "I just wanted to make something special for you.";
-            setInterval(createHearts, 300);
-        };
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = [
+                "Hey, you're amazing! 🌸",
+                "You make the world better! ✨",
+                "Keep being awesome! 🌟",
+                "You're absolutely wonderful! 💫"
+            ];
+
+            // Cursor trail effect
+            const trails = [];
+            const trailCount = 20;
+            
+            for(let i = 0; i < trailCount; i++) {
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                trail.style.opacity = 1 - (i / trailCount);
+                document.body.appendChild(trail);
+                trails.push(trail);
+            }
+
+            let mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            function updateTrails() {
+                trails.forEach((trail, index) => {
+                    setTimeout(() => {
+                        trail.style.left = mouseX + 'px';
+                        trail.style.top = mouseY + 'px';
+                    }, index * 40);
+                });
+                requestAnimationFrame(updateTrails);
+            }
+            updateTrails();
+
+            // Click effects
+            document.addEventListener('click', (e) => {
+                const effect = document.createElement('div');
+                effect.className = 'click-effect';
+                effect.style.left = (e.clientX - 50) + 'px';
+                effect.style.top = (e.clientY - 50) + 'px';
+                document.body.appendChild(effect);
+                
+                // Create particles
+                for(let i = 0; i < 8; i++) {
+                    createParticle(e.clientX, e.clientY);
+                }
+
+                setTimeout(() => effect.remove(), 800);
+                
+                // Change message on click
+                document.querySelector('h1').textContent = 
+                    messages[Math.floor(Math.random() * messages.length)];
+            });
+
+            function createParticle(x, y) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.background = `hsl(${Math.random() * 360}, 70%, 70%)`;
+                particle.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+                particle.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
+            }
+
+            function createHeart() {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = Math.random() * 2 + 3 + 's';
+                
+                heart.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    heart.style.transform = 'rotate(45deg) scale(0)';
+                    setTimeout(() => heart.remove(), 300);
+                    createParticle(e.clientX, e.clientY);
+                });
+
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 5000);
+            }
+
+            // Initial setup
+            document.querySelector('h1').textContent = messages[0];
+            document.querySelector('p').textContent = "Click anywhere for magic! ✨";
+            setInterval(createHeart, 300);
+        });
     </script>
 </head>
 <body>
