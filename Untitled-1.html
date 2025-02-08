@@ -4,198 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Surprise</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-            color: #fff;
-            cursor: none;
-        }
-
-        .cursor-trail {
-            width: 10px;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            animation: bounce 2s ease infinite;
-        }
-
-        p {
-            font-size: 1.8rem;
-            margin-top: 1rem;
-            animation: fadeIn 3s ease-in-out;
-        }
-
-        .heart {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: rgba(255, 192, 203, 0.8);
-            transform: rotate(45deg);
-            animation: floatHeart 4s ease-in-out infinite;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .heart:hover {
-            transform: rotate(45deg) scale(1.2);
-        }
-
-        .particle {
-            position: fixed;
-            pointer-events: none;
-            animation: particle 1s ease-out forwards;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        @keyframes floatHeart {
-            0% { transform: translateY(0) rotate(45deg); opacity: 1; }
-            50% { transform: translateY(-100px) rotate(45deg); opacity: 0.5; }
-            100% { transform: translateY(0) rotate(45deg); opacity: 1; }
-        }
-
-        @keyframes particle {
-            0% { transform: translate(0, 0); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
-        }
-
-        .click-effect {
-            position: fixed;
-            border: 2px solid white;
-            border-radius: 50%;
-            animation: clickRipple 0.8s ease-out forwards;
-            pointer-events: none;
-        }
-
-        @keyframes clickRipple {
-            0% { width: 0; height: 0; opacity: 0.5; }
-            100% { width: 100px; height: 100px; opacity: 0; }
-        }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const messages = [
-                "Hey, you're amazing! 🌸",
-                "You make the world better! ✨",
-                "Keep being awesome! 🌟",
-                "You're absolutely wonderful! 💫"
-            ];
-
-            // Cursor trail effect
-            const trails = [];
-            const trailCount = 20;
-            
-            for(let i = 0; i < trailCount; i++) {
-                const trail = document.createElement('div');
-                trail.className = 'cursor-trail';
-                trail.style.opacity = 1 - (i / trailCount);
-                document.body.appendChild(trail);
-                trails.push(trail);
-            }
-
-            let mouseX = 0, mouseY = 0;
-            document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-            });
-
-            function updateTrails() {
-                trails.forEach((trail, index) => {
-                    setTimeout(() => {
-                        trail.style.left = mouseX + 'px';
-                        trail.style.top = mouseY + 'px';
-                    }, index * 40);
-                });
-                requestAnimationFrame(updateTrails);
-            }
-            updateTrails();
-
-            // Click effects
-            document.addEventListener('click', (e) => {
-                const effect = document.createElement('div');
-                effect.className = 'click-effect';
-                effect.style.left = (e.clientX - 50) + 'px';
-                effect.style.top = (e.clientY - 50) + 'px';
-                document.body.appendChild(effect);
-                
-                // Create particles
-                for(let i = 0; i < 8; i++) {
-                    createParticle(e.clientX, e.clientY);
-                }
-
-                setTimeout(() => effect.remove(), 800);
-                
-                // Change message on click
-                document.querySelector('h1').textContent = 
-                    messages[Math.floor(Math.random() * messages.length)];
-            });
-
-            function createParticle(x, y) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = x + 'px';
-                particle.style.top = y + 'px';
-                particle.style.background = `hsl(${Math.random() * 360}, 70%, 70%)`;
-                particle.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
-                particle.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
-                document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), 1000);
-            }
-
-            function createHeart() {
-                const heart = document.createElement('div');
-                heart.className = 'heart';
-                heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.animationDuration = Math.random() * 2 + 3 + 's';
-                
-                heart.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    heart.style.transform = 'rotate(45deg) scale(0)';
-                    setTimeout(() => heart.remove(), 300);
-                    createParticle(e.clientX, e.clientY);
-                });
-
-                document.body.appendChild(heart);
-                setTimeout(() => heart.remove(), 5000);
-            }
-
-            // Initial setup
-            document.querySelector('h1').textContent = messages[0];
-            document.querySelector('p').textContent = "Click anywhere for magic! ✨";
-            setInterval(createHeart, 300);
-        });
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1></h1>
-    <p></p>
+    <button id="initial-btn">click to start amazing journey</button>
+    <div id="story-text" class="story-text"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialBtn = document.getElementById('initial-btn');
+            const storyText = document.getElementById('story-text');
+            const rainAudio = new Audio('rain.mp3');
+            const padAudio = new Audio('pad.mp3');
+            const magicalAudio = new Audio('magical.mp3');
+            const hoverAudio = new Audio('hover.mp3');
+
+            // Setup audio elements
+            rainAudio.preload = 'auto';
+            padAudio.preload = 'auto';
+            magicalAudio.preload = 'auto';
+            rainAudio.loop = true;
+            padAudio.loop = true;
+            magicalAudio.loop = false;
+            rainAudio.volume = 0;
+            padAudio.volume = 0;
+            magicalAudio.volume = 0;
+            
+            // Fade in button after 3.5 seconds
+            setTimeout(() => {
+                initialBtn.style.opacity = '1';
+            }, 3500);
+
+            // Play hover sound on button mouseenter
+            initialBtn.addEventListener('mouseenter', () => {
+                hoverAudio.currentTime = 0;
+                hoverAudio.volume = 1;
+                hoverAudio.play().catch(e => console.log('Hover sound failed:', e));
+            });
+
+            // On button click: fade out button, then play and fade in three audio files
+            initialBtn.addEventListener('click', async () => {
+                initialBtn.style.transition = 'opacity 3s ease';
+                initialBtn.style.opacity = '0';
+                setTimeout(() => initialBtn.remove(), 3000);
+
+                // Start all three audios
+                rainAudio.volume = 0;
+                padAudio.volume = 0;
+                magicalAudio.volume = 0;
+                try {
+                    await Promise.all([
+                        rainAudio.play(),
+                        padAudio.play(),
+                        magicalAudio.play()
+                    ]);
+                    
+                    let vol = 0;
+                    const fadeInInterval = setInterval(() => {
+                        vol += 0.02;
+                        if(vol >= 0.5) {
+                            clearInterval(fadeInInterval);
+                            vol = 0.5;
+                        }
+                        rainAudio.volume = vol;
+                        padAudio.volume = vol;
+                        magicalAudio.volume = vol;
+                    }, 100);
+                } catch(e) {
+                    console.log('Audio failed:', e);
+                }
+
+                // Adjusted timing for text animations
+                setTimeout(() => {
+                    storyText.textContent = "Once upon a time...";
+                    storyText.classList.add('fade-in');
+                    
+                    // Display first text for 5 seconds then fade out
+                    setTimeout(() => {
+                        storyText.classList.remove('fade-in');
+                        // Gap of 4 seconds before second text fades in
+                        setTimeout(() => {
+                            storyText.textContent = "there was a potato.";
+                            storyText.classList.add('fade-in');
+                        }, 4000);
+                    }, 5000);
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>
